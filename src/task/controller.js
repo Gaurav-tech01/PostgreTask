@@ -67,8 +67,8 @@ const loginUser = async (req, res) => {
 
 const addTask = async (req, res) => {
     try {
-        const { title, description, duedate } = req.body
-        const result = await pool.query(queries.addTask, [title, description, duedate, req.user.id])
+        const { title, details, duedate } = req.body
+        const result = await pool.query(queries.addTask, [title, details, duedate, req.user.id])
         res.send(result.rows[0])
     }
     catch (error) {
@@ -87,7 +87,12 @@ const getTaskById = async (req, res) => {
     try {
         const id = parseInt(req.params.id)
         const result = await pool.query(queries.getTaskById, [req.user.id, id])
-        res.send(result.rows)
+        const noTask = !result.rows.length
+        if (noTask) {
+            res.send("Task Not Present");
+        } else {
+            res.send(result.rows)
+        }
     } catch (error) {
         res.status(500).send(error.message)
     }
@@ -118,7 +123,7 @@ const updateTask = async (req, res) => {
             res.send("Task Not Present");
         } else {
             await pool.query(queries.updateTask, [title, req.user.id, id])
-            res.send("Task deleted successfully")
+            res.send("Task Updated successfully")
         }
     } catch (error) {
         // console.error(error.message);
